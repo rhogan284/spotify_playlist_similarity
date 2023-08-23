@@ -86,5 +86,3 @@ alpha = 2.5
 
 similarity_score = np.exp(-alpha * distance)
 print("Similarity Score: ", similarity_score)
-
-test
