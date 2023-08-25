@@ -1,12 +1,17 @@
+from flask import Flask, render_template, request
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import pandas as pd
 import numpy as np
 
+app = Flask(__name__)
+
 cid = '2a8aceae04c540199bb94acaee3c7c5c'
 secret = '33bf3db97bde4db685bc84b8bea02771'
+redirect_uri = 'http://localhost:3000'
+scope = "playlist-read-private playlist-read-collaborative user-library-read user-top-read"
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=cid, client_secret=secret, cache_path='cache.txt'))
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=cid, client_secret=secret, redirect_uri=redirect_uri, scope=scope, cache_path='cache.txt'))
 
 def call_playlist(creator, playlist_id):
 
@@ -45,42 +50,39 @@ def call_playlist(creator, playlist_id):
 
     return playlist_df
 
-print("Hello!")
-
-playlist_id_1 = input("Please enter the first playlist id: ")
-print("Great! Preparing the first playlist now...")
-df1 = call_playlist("spotify", playlist_id_1)
-#df1.to_csv("playlist_1_data.csv", index = True)
-print("The first playlist has been loaded successfully! " + str(len(df1.index)) + " songs were found!")
-
-playlist_id_2 = input("Please now enter the second playlist id: ")
-print("Great! Preparing the second playlist now...")
-df2 = call_playlist("spotify", playlist_id_2)
-#df2.to_csv("playlist_2_data.csv", index = True)
-print("The second playlist has been loaded successfully! " + str(len(df2.index)) + " songs were found!")
            
 def average_features(df, feature_cols):
     return df[feature_cols].mean().values
 
-feature_cols = ["danceability", "energy", "mode", "speechiness", "instrumentalness", "liveness", "valence"]
-avg_features_df1 = average_features(df1, feature_cols)
-avg_features_df2 = average_features(df2, feature_cols)
-
-def euclidean_distance_np(vector1, vector2):
+def euclidean_distance(vector1, vector2):
     return np.linalg.norm(vector1 - vector2)
 
-distance = euclidean_distance_np(avg_features_df1, avg_features_df2)
-print("Euclidean Distance between the playlists:", distance)
+def get_distance(playlist_id_1, playlist_id_2):
+ 
+    feature_cols = ["danceability", "energy", "mode", "speechiness", "instrumentalness", "liveness", "valence"]
 
-#def scaled_exponential_similarity(distance, alpha=2.5):
-#    return np.exp(-alpha * distance)
+    df1 = call_playlist("spotify", playlist_id_1)
+    df2 = call_playlist("spotify", playlist_id_2)
 
-#alpha_values = [1, 2, 3, 5, 10]
-#for alpha in alpha_values:
-#    similarity_score = scaled_exponential_similarity(distance, alpha)
-#    print(f"Similarity Score (alpha={alpha}):", similarity_score)
+    avg_features_df1 = average_features(df1, feature_cols)
+    avg_features_df2 = average_features(df2, feature_cols)
 
-alpha = 2.5
+    return euclidean_distance(avg_features_df1, avg_features_df2)
 
-similarity_score = np.exp(-alpha * distance)
-print("Similarity Score: ", similarity_score)
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    similarity_score = None
+
+    if request.method == "POST":
+        playlist_id_1 = request.form['playlist1']
+        playlist_id_2 = request.form['playlist2']
+
+        distance = get_distance(playlist_id_1, playlist_id_2)
+
+        alpha = 2.5
+        similarity_score = np.exp(-alpha * distance)
+    return render_template('index.html', similarity=similarity_score)
+
+if __name__ == '__main__':
+    app.run(debug=True)

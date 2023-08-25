@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playlist Similarity</title>
+</head>
+
+<body>
+    <form action="/" method="post">
+        Playlist ID 1: <input type="text" name="playlist1"><br>
+        Playlist ID 2: <input type="text" name="playlist2"><br>
+        <input type="submit" value="Calculate Similarity">
+    </form>
+
+{% if similarity != None %}
+    <h2>Similarity Score: {{ similarity }}</h2>
+{% endif %}
+
+
+</body>
+</html>
+    
