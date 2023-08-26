@@ -81,7 +81,10 @@ def index():
         distance = get_distance(playlist_id_1, playlist_id_2)
 
         alpha = 2.5
-        similarity_score = np.exp(-alpha * distance)
+        similarity_calc = np.exp(-alpha * distance)*100
+        similarity_score = float("{:.2f}".format(similarity_calc))
+
+
     return render_template('index.html', similarity=similarity_score)
 
 if __name__ == '__main__':

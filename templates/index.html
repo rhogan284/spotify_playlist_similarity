@@ -2,18 +2,27 @@
 <html>
 <head>
     <title>Playlist Similarity</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
 </head>
 
 <body>
     <form action="/" method="post">
-        Playlist ID 1: <input type="text" name="playlist1"><br>
-        Playlist ID 2: <input type="text" name="playlist2"><br>
+        <div class="row">
+            <div class="column">
+                <h2>Playlist ID 1:</h2>
+                <input type="text" name="playlist1"><br>
+            </div>
+            <div class="column">
+                <h2>Playlist ID 2:</h2> 
+                <input type="text" name="playlist2"><br>
+            </div>
+          </div>
         <input type="submit" value="Calculate Similarity">
     </form>
 
-{% if similarity != None %}
-    <h2>Similarity Score: {{ similarity }}</h2>
-{% endif %}
+    {% if similarity != None %}
+    <h2>The playists are {{ similarity }}% similar!</h2>
+    {% endif %}
 
 
 </body>
